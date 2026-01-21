@@ -1,0 +1,101 @@
+SHOW TABLES IN default;
+
+DESCRIBE TABLE workspace.default.dim_customers ;
+
+DESCRIBE TABLE workspace.default.dim_products;
+
+DESCRIBE TABLE workspace.default.fact_sales; 
+
+SELECT DISTINCT country FROM workspace.default.dim_customers 
+
+
+
+
+SELECT category, subcategory, product_name
+FROM workspace.default.dim_products
+WHERE category IS NOT NULL
+  AND subcategory IS NOT NULL
+  AND product_name IS NOT NULL
+
+
+
+SELECT 
+  SUM(sales_amount) AS total_sales
+FROM workspace.default.fact_sales;
+
+SELECT 
+  COUNT(DISTINCT order_number) AS total_orders
+FROM workspace.default.fact_sales;
+
+
+SELECT 
+  COUNT(DISTINCT customer_id) AS total_customers
+FROM workspace.default.dim_customers;
+
+
+SELECT 
+  COUNT(DISTINCT product_id) AS total_products
+FROM workspace.default.dim_products;
+
+
+SELECT 
+  p.category,
+  SUM(f.sales_amount) AS total_sales
+FROM workspace.default.fact_sales f
+JOIN workspace.default.dim_products p
+  ON f.product_key = p.product_key
+GROUP BY p.category
+ORDER BY total_sales DESC; 
+
+
+SELECT 
+  DATE_TRUNC('month', order_date) AS order_month,
+  COUNT(DISTINCT order_number) AS total_orders,
+  SUM(sales_amount) AS total_sales
+FROM workspace.default.fact_sales
+GROUP BY order_month
+ORDER BY order_month;
+
+
+
+SELECT 
+    CASE 
+        WHEN YEAR(CURRENT_DATE()) - YEAR(c.birthdate) BETWEEN 10 AND 20 THEN '10-20'
+        WHEN YEAR(CURRENT_DATE()) - YEAR(c.birthdate) BETWEEN 21 AND 30 THEN '21-30'
+        WHEN YEAR(CURRENT_DATE()) - YEAR(c.birthdate) BETWEEN 31 AND 40 THEN '31-40'
+        ELSE '40+' 
+    END AS age_group,
+    COUNT(DISTINCT s.order_number) AS number_of_orders
+FROM workspace.default.fact_sales s
+JOIN workspace.default.dim_customers c 
+    ON s.customer_key = c.customer_key
+GROUP BY age_group
+
+
+
+SELECT 
+    customer_key, 
+    SUM(sales_amount) AS total_sales
+FROM workspace.default.fact_sales
+GROUP BY customer_key
+ORDER BY total_sales DESC
+LIMIT 10
+
+
+
+
+SELECT 
+    ,
+    (sales_amount  0.30) AS profit
+FROM workspace.default.fact_sales
+
+
+
+
+
+
+
+
+
+
+  

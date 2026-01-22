@@ -5,6 +5,7 @@
 
 This project analyzes sales data using **Databricks SQL and Lakehouse architecture** to extract meaningful business insights.
 It simulates a real-world analytics workflow followed by data analysts in modern companies.
+Dataset: Retail orders dataset queried using Databricks SQL (~$29M total sales).
 
 ---
 

@@ -58,7 +58,7 @@ Tables used:
 * Average Sales per Customer
 * Total Orders
 * Orders by Customer Age Group
-* Top 10 Customers by Sales
+
 
 ---
 
@@ -84,7 +84,7 @@ Tables used:
 ## Author
 
 Arun Siddharth K
-Aspiring SQL Developer
+
 
 ---
 

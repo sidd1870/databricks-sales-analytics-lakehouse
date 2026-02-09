@@ -85,13 +85,73 @@ LIMIT 10
 
 
 SELECT 
-    ,
-    (sales_amount  0.30) AS profit
+    *,
+    (sales_amount * 0.30) AS profit
+FROM workspace.default.fact_sales 
+
+
+WITH CTE_TAB as (
+   SELECT order_date as currentdate,
+    LAG(order_date) OVER (ORDER BY order_date) AS previousdate
+    FROM workspace.default.fact_sales 
+
+)
+
+SELECT *, currentdate - previousdate AS date_difference
+FROM CTE_TAB
+
+
+SELECT 
+  order_date,
+  sales_amount,
+  SUM(sales_amount) OVER (ORDER BY order_date) AS running_total
 FROM workspace.default.fact_sales
+ORDER BY order_date;
+
+
+SELECT 
+    DAYNAME(order_date) AS day_of_week,
+    AVG(sales_amount) AS avg_daily_sales,
+    SUM(sales_amount) AS total_revenue
+FROM workspace.default.fact_sales
+GROUP BY day_of_week, DAYOFWEEK(order_date)
+ORDER BY DAYOFWEEK(order_date);
+
+
+SELECT 
+    order_number,
+    sales_amount,
+    CASE 
+        WHEN sales_amount > 500 THEN 'Top Sales'
+        WHEN sales_amount BETWEEN 100 AND 500 THEN 'Mid Sales'
+        ELSE 'Low Sales'
+    END AS sales_tier
+FROM workspace.default.fact_sales
+ORDER BY sales_amount DESC;
+
+
+SELECT 
+    p.product_name,
+    p.category,
+    p.subcategory
+FROM workspace.default.dim_products p
+LEFT JOIN workspace.default.fact_sales f 
+    ON p.product_key = f.product_key
+WHERE f.product_key IS NULL;
 
 
 
 
+
+SELECT 
+    customer_key,
+    MIN(order_date) AS first_buy,
+    MAX(order_date) AS latest_buy,
+    DATEDIFF(MAX(order_date), MIN(order_date)) AS days_active
+FROM workspace.default.fact_sales
+GROUP BY customer_key
+HAVING days_active > 0
+ORDER BY days_active DESC;
 
 
 

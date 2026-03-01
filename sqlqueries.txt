@@ -1,43 +1,78 @@
+## 📊 Schema Exploration
+
+### List All Tables
+```sql
 SHOW TABLES IN default;
+```
 
-DESCRIBE TABLE workspace.default.dim_customers ;
+### Describe Customer Dimension Table
+```sql
+DESCRIBE TABLE workspace.default.dim_customers;
+```
 
+### Describe Product Dimension Table
+```sql
 DESCRIBE TABLE workspace.default.dim_products;
+```
 
-DESCRIBE TABLE workspace.default.fact_sales; 
+### Describe Sales Fact Table
+```sql
+DESCRIBE TABLE workspace.default.fact_sales;
+```
 
-SELECT DISTINCT country FROM workspace.default.dim_customers 
+---
 
+## 🌍 Data Exploration
 
+### Get Distinct Customer Countries
+```sql
+SELECT DISTINCT country 
+FROM workspace.default.dim_customers;
+```
 
-
+### Retrieve Valid Product Hierarchy
+```sql
 SELECT category, subcategory, product_name
 FROM workspace.default.dim_products
 WHERE category IS NOT NULL
   AND subcategory IS NOT NULL
-  AND product_name IS NOT NULL
+  AND product_name IS NOT NULL;
+```
 
+---
 
+## 💰 Business KPIs
 
-SELECT 
-  SUM(sales_amount) AS total_sales
+### Calculate Total Sales Revenue
+```sql
+SELECT SUM(sales_amount) AS total_sales
 FROM workspace.default.fact_sales;
+```
 
-SELECT 
-  COUNT(DISTINCT order_number) AS total_orders
+### Count Total Unique Orders
+```sql
+SELECT COUNT(DISTINCT order_number) AS total_orders
 FROM workspace.default.fact_sales;
+```
 
-
-SELECT 
-  COUNT(DISTINCT customer_id) AS total_customers
+### Count Total Unique Customers
+```sql
+SELECT COUNT(DISTINCT customer_id) AS total_customers
 FROM workspace.default.dim_customers;
+```
 
-
-SELECT 
-  COUNT(DISTINCT product_id) AS total_products
+### Count Total Unique Products
+```sql
+SELECT COUNT(DISTINCT product_id) AS total_products
 FROM workspace.default.dim_products;
+```
 
+---
 
+## 📈 Sales Analysis
+
+### Total Sales by Product Category
+```sql
 SELECT 
   p.category,
   SUM(f.sales_amount) AS total_sales
@@ -45,9 +80,11 @@ FROM workspace.default.fact_sales f
 JOIN workspace.default.dim_products p
   ON f.product_key = p.product_key
 GROUP BY p.category
-ORDER BY total_sales DESC; 
+ORDER BY total_sales DESC;
+```
 
-
+### Monthly Orders and Revenue Trend
+```sql
 SELECT 
   DATE_TRUNC('month', order_date) AS order_month,
   COUNT(DISTINCT order_number) AS total_orders,
@@ -55,9 +92,14 @@ SELECT
 FROM workspace.default.fact_sales
 GROUP BY order_month
 ORDER BY order_month;
+```
 
+---
 
+## 👥 Customer Analytics
 
+### Customer Age Group Order Distribution
+```sql
 SELECT 
     CASE 
         WHEN YEAR(CURRENT_DATE()) - YEAR(c.birthdate) BETWEEN 10 AND 20 THEN '10-20'
@@ -69,46 +111,54 @@ SELECT
 FROM workspace.default.fact_sales s
 JOIN workspace.default.dim_customers c 
     ON s.customer_key = c.customer_key
-GROUP BY age_group
+GROUP BY age_group;
+```
 
-
-
+### Top 10 Customers by Total Sales
+```sql
 SELECT 
     customer_key, 
     SUM(sales_amount) AS total_sales
 FROM workspace.default.fact_sales
 GROUP BY customer_key
 ORDER BY total_sales DESC
-LIMIT 10
+LIMIT 10;
+```
 
+---
 
+## 📉 Advanced Metrics
 
+### Estimate Profit from Sales
+```sql
+SELECT *, (sales_amount * 0.30) AS profit
+FROM workspace.default.fact_sales;
+```
 
-SELECT 
-    *,
-    (sales_amount * 0.30) AS profit
-FROM workspace.default.fact_sales 
-
-
-WITH CTE_TAB as (
-   SELECT order_date as currentdate,
+### Calculate Days Between Consecutive Orders
+```sql
+WITH CTE_TAB AS (
+   SELECT 
+    order_date AS currentdate,
     LAG(order_date) OVER (ORDER BY order_date) AS previousdate
-    FROM workspace.default.fact_sales 
-
+    FROM workspace.default.fact_sales
 )
-
 SELECT *, currentdate - previousdate AS date_difference
-FROM CTE_TAB
+FROM CTE_TAB;
+```
 
-
+### Running Total of Sales Over Time
+```sql
 SELECT 
   order_date,
   sales_amount,
   SUM(sales_amount) OVER (ORDER BY order_date) AS running_total
 FROM workspace.default.fact_sales
 ORDER BY order_date;
+```
 
-
+### Revenue Analysis by Day of Week
+```sql
 SELECT 
     DAYNAME(order_date) AS day_of_week,
     AVG(sales_amount) AS avg_daily_sales,
@@ -116,8 +166,10 @@ SELECT
 FROM workspace.default.fact_sales
 GROUP BY day_of_week, DAYOFWEEK(order_date)
 ORDER BY DAYOFWEEK(order_date);
+```
 
-
+### Classify Orders by Sales Value
+```sql
 SELECT 
     order_number,
     sales_amount,
@@ -128,8 +180,14 @@ SELECT
     END AS sales_tier
 FROM workspace.default.fact_sales
 ORDER BY sales_amount DESC;
+```
 
+---
 
+## 🧩 Data Quality & Insights
+
+### Identify Products Without Sales
+```sql
 SELECT 
     p.product_name,
     p.category,
@@ -138,11 +196,10 @@ FROM workspace.default.dim_products p
 LEFT JOIN workspace.default.fact_sales f 
     ON p.product_key = f.product_key
 WHERE f.product_key IS NULL;
+```
 
-
-
-
-
+### Customer Purchase Activity Duration Analysis
+```sql
 SELECT 
     customer_key,
     MIN(order_date) AS first_buy,
@@ -152,10 +209,4 @@ FROM workspace.default.fact_sales
 GROUP BY customer_key
 HAVING days_active > 0
 ORDER BY days_active DESC;
-
-
-
-
-
-
-  
+```
